@@ -1,0 +1,94 @@
+{
+  "name": "azpipes-vscode-debugger",
+  "version": "1.0.0",
+  "description": "A VS Code extension to debug Azure pipelines locally in your IDE",
+  "publisher": "F00L1X",
+  "main": "src/extension.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc -p ./"
+  },
+  "keywords": [
+    "azure",
+    "pipelines",
+    "debug",
+    "yaml"
+  ],
+  "author": "F00L1X",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/F00L1X/AzPipes_VSCode_debugger.git"
+  },
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Debuggers",
+    "Azure"
+  ],
+  "icon": "images/icon.png",
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onCommand:azpipes-vscode-debugger.debugPipeline",
+    "onDebug"
+  ],
+  "dependencies": {
+    "@vscode/debugadapter": "^1.51.0",
+    "@vscode/debugprotocol": "^1.51.0",
+    "js-yaml": "^4.1.0",
+    "vscode-languageclient": "^8.1.0",
+    "azure-pipelines-language-server": "^0.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/vscode": "^1.60.0",
+    "typescript": "^5.6.2"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "azpipes-vscode-debugger.debugPipeline",
+        "title": "Debug Azure Pipeline"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "azpipes-vscode-debugger.debugPipeline",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d",
+        "when": "editorLangId == yaml"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "azurePipelines",
+        "label": "Azure Pipelines Debug",
+        "program": "./out/debugAdapter.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to the Azure Pipelines YAML file.",
+                "default": "${file}"
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "azurePipelines",
+            "request": "launch",
+            "name": "Debug Azure Pipeline",
+            "program": "${file}"
+          }
+        ]
+      }
+    ]
+  }
+}

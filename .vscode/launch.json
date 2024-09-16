@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/src/extension.js",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Azure Pipeline",
+            "program": "${workspaceFolder}/src/extension.js",
+            "args": ["${file}"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ]
+        }
+    ]
+}

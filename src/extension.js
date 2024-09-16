@@ -1,8 +1,8 @@
 const vscode = require('vscode');
 const { LanguageClient, TransportKind } = require('vscode-languageclient/node');
 const path = require('path');
-const { AzurePipelinesDebugSession } = require('./debugAdapter');
-const { spawn } = require('child_process');
+const { AzurePipelinesDebugSession } = require('../out/debugAdapter');
+const { AzurePipelinesLanguageServer } = require('azure-pipelines-language-server');
 
 let client;
 let gharunServer;
@@ -47,28 +47,29 @@ function activate(context) {
     // Register the command to start debugging
     let disposable = vscode.commands.registerCommand('azpipes-vscode-debugger.debugPipeline', async function () {
         const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            const document = editor.document;
-            if (document.languageId === 'yaml' && document.fileName.endsWith('.yml')) {
-                await startGharunServer();
-                vscode.debug.startDebugging(undefined, {
-                    type: 'azurePipelines',
-                    name: 'Debug Azure Pipeline',
-                    request: 'launch',
-                    program: document.fileName
-                });
-            } else {
-                vscode.window.showErrorMessage('Please open an Azure Pipelines YAML file to debug.');
-            }
-        } else {
+        if (!editor) {
             vscode.window.showErrorMessage('No active editor found. Please open an Azure Pipelines YAML file to debug.');
+            return;
         }
+
+        const document = editor.document;
+        if (document.languageId !== 'yaml' || (!document.fileName.endsWith('.yml') && !document.fileName.endsWith('.yaml'))) {
+            vscode.window.showErrorMessage('Please open an Azure Pipelines YAML file (.yml or .yaml) to debug.');
+            return;
+        }
+
+        vscode.debug.startDebugging(undefined, {
+            type: 'azurePipelines',
+            name: 'Debug Azure Pipeline',
+            request: 'launch',
+            program: document.fileName
+        });
     });
 
     context.subscriptions.push(disposable);
 
     // Set up the language server
-    const serverModule = context.asAbsolutePath(path.join('src', 'server.js'));
+    const serverModule = path.join(__dirname, '..', 'out', 'server.js');
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
 
     const serverOptions = {
@@ -77,7 +78,7 @@ function activate(context) {
     };
 
     const clientOptions = {
-        documentSelector: [{ scheme: 'file', language: 'yaml' }],
+        documentSelector: [{ scheme: 'file', language: 'yaml', pattern: '**/*.{yml,yaml}' }],
         synchronize: {
             fileEvents: vscode.workspace.createFileSystemWatcher('**/*.{yml,yaml}')
         }
@@ -102,29 +103,8 @@ function deactivate() {
     }
 }
 
-async function startGharunServer() {
-    if (gharunServer) {
-        gharunServer.kill();
-    }
-    return new Promise((resolve, reject) => {
-        gharunServer = spawn('node', ['path/to/gharun/server.js']);
-        gharunServer.stdout.on('data', (data) => {
-            outputChannel.appendLine(`Gharun Server: ${data}`);
-        });
-        gharunServer.stderr.on('data', (data) => {
-            outputChannel.appendLine(`Gharun Server Error: ${data}`);
-        });
-        gharunServer.on('error', (err) => {
-            outputChannel.appendLine(`Failed to start Gharun Server: ${err}`);
-            reject(err);
-        });
-        gharunServer.on('close', (code) => {
-            outputChannel.appendLine(`Gharun Server process exited with code ${code}`);
-        });
-        // Assume the server is ready after a short delay
-        setTimeout(resolve, 1000);
-    });
-}
+// The startGharunServer function has been removed as it's no longer needed
+// with the Azure Pipelines Language Server integration.
 
 async function expandAzurePipeline(preview, repositories, variables, parameters, onSuccess, filename, onError) {
     try {

@@ -7,3 +7,28 @@ pool:
 steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
+
+- script: |
+    echo This is a multi-line script
+    echo It demonstrates more complex pipeline structures
+  displayName: 'Run a multi-line script'
+
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "Testing variables:"
+      echo "Build ID: $(Build.BuildId)"
+      echo "Build Number: $(Build.BuildNumber)"
+  displayName: 'Test pipeline variables'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(System.DefaultWorkingDirectory)'
+    artifactName: 'drop'
+  displayName: 'Publish artifact'
+
+- script: |
+    echo "This is a test for the AzPipes_VSCode_debugger extension"
+    echo "If you see this message in the debug console, the extension is working!"
+  displayName: 'Test AzPipes_VSCode_debugger'
